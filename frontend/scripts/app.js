@@ -8,7 +8,6 @@ window.onload = function () {
     }
     const options = {
       method: 'POST',
-      mode: 'no-cors',
       headers: {
         'Access-Control-Allow-Origin' : '*',
         'Accept': 'application/json',
@@ -16,6 +15,8 @@ window.onload = function () {
       },
       body: JSON.stringify(data)
     }
-    fetch('http://127.0.0.1:8000/', options)
+    fetch('http://127.0.0.1:8000/', options).then(()=>{
+      console.log("working")
+    })
   };
 }

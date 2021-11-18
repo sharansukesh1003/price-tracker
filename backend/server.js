@@ -1,8 +1,6 @@
 const PORT = 8000
 const express = require('express')
 const axios = require('axios')
-const cheerio = require('cheerio')
-const { request, response } = require('express')
 const cors = require("cors")
 
 const corsOptions = {
@@ -20,7 +18,7 @@ app.post('/', async (req, res) => {
     useragent = req.body.userAgent
     axios.post('http://127.0.0.1:8080/amazon/', {
         prod_link : productLink
-    }).then((response) => {
+    }).then(response => {
         try {
             let productTitle = response.data.product_title
             let productPrice = response.data.product_price
@@ -32,11 +30,16 @@ app.post('/', async (req, res) => {
                 })  
             }
             else{
-                res.json({
+                res.set({
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                })
+                res.send({
                     code: 200,
                     product_title: productTitle,
                     product_price: productPrice,
                 })
+                console.log("success")
             }
         }
         catch(error){
