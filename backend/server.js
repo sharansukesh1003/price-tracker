@@ -1,56 +1,35 @@
-const PORT = 8000
 const express = require('express')
-const axios = require('axios')
 const cors = require("cors")
-
-const corsOptions = {
-    origin : '*', 
-    credentials : true,          
-    optionSuccessStatus : 200,
- } 
-
+const mongoose = require('mongoose')
+const morgan = require('morgan')
+const authJwt = require('./helpers/jwt')
+const errorHandler = require('./helpers/errorHandler')
+require('dotenv').config()
 const app = express()
-app.use(cors(corsOptions))
+
+// constatns
+const api = process.env.API_URL
+const port = process.env.PORT
+
+// middleware
+app.use(cors())
+app.options('*', cors())
+app.use(morgan('tiny'))
+app.use(authJwt())
 app.use(express.json())
+app.use(errorHandler)
 
-app.post('/', async (req, res) => {
-    productLink = req.body.url
-    useragent = req.body.userAgent
-    axios.post('http://127.0.0.1:8080/amazon/', {
-        prod_link : productLink
-    }).then(response => {
-        try {
-            let productTitle = response.data.product_title
-            let productPrice = response.data.product_price
-            let parsing = response.data.success
-            if(parsing == false){
-                res.send({
-                    code: 401,
-                    message : "Something went wrong"
-                })  
-            }
-            else{
-                res.set({
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                })
-                res.send({
-                    code: 200,
-                    product_title: productTitle,
-                    product_price: productPrice,
-                })
-                console.log("success")
-            }
-        }
-        catch(error){
-            res.send({
-                code : 401,
-                message : "Something went wrong"
-            })
-        }
+//routes
+const productsRoutes = require('./routes/trackerRoutes')
+const usersRoutes = require('./routes/userRoutes')
+
+app.use(`${api}/products`, productsRoutes)
+app.use(`${api}/users`, usersRoutes)
+
+// server & database
+mongoose.connect(process.env.CONNECTION_STRING, () => {
+    console.log("Database Connected")
+    app.listen(port || 5000, () => {
+        console.log("Server live on port 8000")
     })
-})
-
-app.listen(PORT, () => {
-    console.log(`Server is live on ${PORT}`)
 })

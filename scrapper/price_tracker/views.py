@@ -17,8 +17,13 @@ def amazon_price_tracker(request):
         product_link = data['prod_link']
         webpage = requests.get(product_link, headers = HEADERS)
         soup = BeautifulSoup(webpage.content,'lxml')
-        product_title = soup.find(id = 'productTitle').get_text().strip()
-        product_price = soup.find(id = 'priceblock_ourprice').get_text()
+        try:
+            product_title = soup.find(id = 'productTitle').get_text().strip()
+            product_price = soup.find(id = 'priceblock_ourprice').get_text()
+        except Exception as e:
+            print(e)
+        print(product_title)
+        print(product_price)
         price = ""
         for i in product_price:
             if i == '.':
@@ -30,7 +35,9 @@ def amazon_price_tracker(request):
             'product_price' : value,
             'product_title' : product_title,
             'success' : True
-        } 
+        }
+        print(product_detail)
         return Response(product_detail)
     except Exception as e:
+        print("failed")
         return Response({'success' : False})
