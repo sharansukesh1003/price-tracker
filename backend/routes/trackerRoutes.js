@@ -3,6 +3,34 @@ const { User } = require('../models/userModel')
 const axios = require('axios')
 const express = require('express')
 const router = express.Router()
+require('dotenv').config()
+
+// constants
+const cron = process.env.CRON
+
+// price-comparator
+router.get(`${cron}`, async (req, res) => {
+    const product = await Product.find().populate('user', 'email')
+    for(let i = 0; i < product.length; i++){
+        await axios.get('http://127.0.0.1:8080/amazon/')
+        .then( response => {
+            try {
+                let parsing = response.data.success
+                if(parsing != false){
+                    let productPrice = response.data.product_price
+                    if(product[i].price < productPrice) {
+                        // email function goes here
+                        //https://www.w3schools.com/nodejs/nodejs_email.asp
+                    }
+                }
+            }
+            catch(error){
+                console.log(error)
+            }
+        })
+    }
+    res.send(product)
+})
 
 //get user products
 router.get('/mylist/:id', async (req, res) => {
@@ -30,6 +58,61 @@ router.get('/mylist/:id', async (req, res) => {
 
 // add new product
 router.post('/add', async (req, res) => {
+    let productLink = req.body.url
+    let useragent = req.body.userAgent
+    axios.post('http://127.0.0.1:8080/amazon/', {
+        prod_link : productLink
+    }).then(async response => {
+        try {
+            let productTitle = response.data.product_title
+            let productPrice = response.data.product_price
+            let parsing = response.data.success
+            let user = req.body.user
+            if(parsing == false){
+                res
+                .status(401)
+                .send({
+                    message : "Something went wrong"
+                })  
+            }
+            else {
+                let product = new Product({
+                    title : productTitle,
+                    price : productPrice,
+                    user : user,
+                    url : productLink
+                })
+                product = await product.save()
+                if(!product){
+                    return res
+                    .status(400)
+                    .send({
+                        message : "Oops! Something went wrong, try again later."
+                    })
+                }
+                else {
+                    return res
+                    .status(400)
+                    .send({
+                        product: product,
+                        message : "The Product was added succesfully, we will let you know when the price drops !"
+                    })
+                }
+            }
+        }
+        catch(error){
+            console.log(error)
+            return res
+            .status(404)
+            .send({
+                message : error
+            })
+        }
+    })
+})
+
+// check price
+router.post('/checkprice', async (req, res) => {
     let productLink = req.body.url
     let useragent = req.body.userAgent
     axios.post('http://127.0.0.1:8080/amazon/', {

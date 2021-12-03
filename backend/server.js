@@ -4,6 +4,7 @@ const mongoose = require('mongoose')
 const morgan = require('morgan')
 const authJwt = require('./helpers/jwt')
 const errorHandler = require('./helpers/errorHandler')
+const cronJob = require('./cron/cron')
 require('dotenv').config()
 const app = express()
 
