@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from bs4 import BeautifulSoup
 from pip._vendor import requests
 
+## when deployed to server use server's user agent 
 HEADERS = { "User-Agent" : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36' }
 
 @api_view(['GET'])
