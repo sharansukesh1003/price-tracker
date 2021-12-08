@@ -7,10 +7,6 @@ from pip._vendor import requests
 ## when deployed to server use server's user agent 
 HEADERS = { "User-Agent" : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36' }
 
-@api_view(['GET'])
-def home_view(request):
-    return Response("hello")
-
 @api_view(['POST'])
 def amazon_price_tracker(request):
     try:
@@ -23,8 +19,6 @@ def amazon_price_tracker(request):
             product_price = soup.find(id = 'priceblock_ourprice').get_text()
         except Exception as e:
             print(e)
-        print(product_title)
-        print(product_price)
         price = ""
         for i in product_price:
             if i == '.':
@@ -40,5 +34,8 @@ def amazon_price_tracker(request):
         print(product_detail)
         return Response(product_detail)
     except Exception as e:
-        print("failed")
-        return Response({'success' : False})
+        print(e)
+        return Response({
+            'message' : e,
+            'success' : False
+        })
